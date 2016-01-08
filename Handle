@@ -1,0 +1,25 @@
+
+
+public class Handle<T> {
+	
+	int key;
+	T value;
+	int index;
+	
+	public Handle(int key, T value) {
+		this.key = key;
+		this.value = value;
+	}
+	
+	public void setKey(int newKey) {
+		key = newKey;
+	}
+	
+	public T getValue() {
+		return value;
+	}
+
+	public int getKey() {
+		return key;
+	}
+}
