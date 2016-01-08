@@ -1,0 +1,204 @@
+import java.util.ArrayList;
+
+// PRIORITYQUEUE.JAVA
+// A priority queue class supporting sundry operations needed for
+// Dijkstra's algorithm.
+//
+
+class PriorityQueue<T> {
+	ArrayList<Handle<T>> Q;
+	// constructor
+	//
+	public PriorityQueue()
+	{
+		Q = new ArrayList<Handle<T>>();
+	}
+
+	// Return true iff the queue is empty.
+	//
+	public boolean isEmpty()
+	{
+		if(Q.isEmpty())
+			return true;
+		return false;
+	}
+
+	// Insert a pair (key, value) into the queue, and return
+	// a Handle to this pair so that we can find it later in
+	// constant time.
+	//
+	Handle<T> insert(int key, T value)
+	{
+		//		System.out.println(toString());
+//		System.out.println("insert " + key);
+		Handle<T> answer = new Handle<T>(key, value);
+		Q.add(answer);
+		int i = Q.size()-1;
+		answer.index = i;
+		while(i > 1 && key < Q.get((i+1)/2-1).key) {
+			swap(Q.get(i), Q.get((int) Math.floor((i+1)/2.0-1)));
+			i = (int) Math.floor((i+1)/2.0-1);
+		}
+		return answer;
+	}
+
+	// Return the smallest key in the queue.
+	//
+	public int min()
+	{
+		return Q.get(0).getKey();
+	}
+
+	// Extract the (key, value) pair associated with the smallest
+	// key in the queue and return its "value" object.
+	//
+	public T extractMin()
+	{
+//		System.out.println("in extractmin");
+		Handle<T> k = Q.get(0);
+		//		Q.get(0).setKey(-1); //change key to -1 --> implies removal
+		//		Q.set(0, Q.get(Q.size()-1)); //place last leaf at root
+		//		Q.get(Q.size()-1).index = 0;
+		swap(Q.get(0), Q.get(Q.size()-1));
+		Q.remove(Q.size()-1); //delete duplicate
+		if(Q.size()>0)
+			heapify(0);
+		//		System.out.println("extractMin before return");
+		return k.getValue(); 
+	}
+
+	public void heapify(int i) {
+		int left = 2*(i+1)-1;
+		int right = 2*(i+1);
+		if(i <= (Q.size()-1)/2) {
+			if(right <= Q.size()-1) { //check for right child
+				if(Q.get(left).key < Q.get(right).key && Q.get(left).key < Q.get(i).key) {
+//					System.out.println("swapping 1");
+					swap(Q.get(i), Q.get(left));
+					heapify(left);
+				}
+				else if(Q.get(right).key < Q.get(i).key) {
+//					System.out.println("swapping 2");
+					swap(Q.get(i), Q.get(right));
+					heapify(right);
+				}
+
+			}
+			else if(left <= Q.size()-1 && Q.get(left).key < Q.get(i).key) {
+//				System.out.println("swapping 3");
+				swap(Q.get(i), Q.get(left));
+				heapify(left);
+			}
+		}
+		//		System.out.println(toString());
+	}
+
+	// swap two elements in the queue
+	void swap(Handle<T> i, Handle<T> j) {
+		// swap Q.get(i) with Q.get(j)
+		// update Q.get(i)'s index
+		// update Q.get(j)'s index
+//		if(i>=1 && j>=1 && Q.size() >= 2){
+
+//			//		System.out.println((i-1) + " " + (j-1) + " size: " + Q.size() + Q.get(i-1).index);
+//			System.out.println("swapping " + (i) + " and " + (j) + " in array size " + Q.size());
+//			int tempIndex = Q.get(i).index;
+//			Handle <T>tempHandle = Q.get(i);
+//			Q.get(i).index = Q.get(j).index;
+//			Q.get(j).index = tempIndex;
+////			Handle<T> tempHandle = null;
+////			if(i <= Q.size())
+//				
+////			System.out.println(tempHandle.key);
+////			if(tempHandle != null) {
+//				Q.set(Q.get(j).index, Q.get(j));
+//				Q.set(Q.get(i).index, tempHandle);
+//			}
+
+		int temp = i.index;
+		Q.set(i.index, j);
+		Q.set(j.index, i);
+		i.index = j.index;
+		j.index = temp;
+		}
+	
+
+
+
+	// Look at the (key, value) pair referenced by Handle h.
+	// If that pair is no longer in the queue, or its key
+	// is <= newkey, do nothing and return false.  Otherwise,
+	// replace "key" by "newkey", fixup the queue, and return
+	// true.
+	//
+	public boolean decreaseKey(Handle<T> h, int newkey)
+	{
+//		System.out.println("in decreasekey");
+//		int count = 0;
+//		for(int i = 0; i < Q.size(); i++) {
+//			if(Q.get(i).equals(h))
+//				count++;
+//		}
+//		if(count == 0)
+//			return false;
+		if(h.getKey() <= newkey)
+			return false;
+		if(h.index == -1) //invalid
+			return false;
+		else {
+			h.setKey(newkey);
+			int i = h.index;
+			if(i < Q.size()) {
+			while(i >= 0 && newkey < Q.get((i-1)/2).key) {
+				swap(Q.get(i), Q.get((int) Math.floor((i-1)/2.0)));
+				i = (int) Math.floor((i-1)/2.0);
+			}
+			//			h.index = i;
+			Q.set(i, h); //place new element in final position
+			}
+			return true;
+		}
+	}
+
+
+	// Get the key of the (key, value) pair associated with a 
+	// given Handle. (This result is undefined if the handle no longer
+	// refers to a pair in the queue.)
+	//
+	public int handleGetKey(Handle<T> h)
+	{
+		//		for(Handle<T> a : Q) {
+		//			if(a.key == h.key && a.value.equals(h.value)) {
+		//				return a.getKey();
+		//			}
+		//		}
+		//		return -1; //if not in queue
+		return h.key;
+	}
+
+	// Get the value object of the (key, value) pair associated with a 
+	// given Handle. (This result is undefined if the handle no longer
+	// refers to a pair in the queue.)
+	//
+	public T handleGetValue(Handle<T> h)
+	{
+		//		for(Handle<T> a : Q) {
+		//			if(a.equals(h)) {
+		//				return a.getValue(); 
+		//			}
+		//		}
+		//		return null; //if not in queue
+		return h.value;
+	}
+
+	// Print every element of the queue in the order in which it appears
+	// in the implementation (i.e. the array representing the heap).
+	public String toString()
+	{
+		String s = ""; 
+		for(int i = 0; i < Q.size(); i++) {
+			s += ("(" + Q.get(i).getKey() + ", " + Q.get(i).getValue().toString() + ")" + "\n");
+		}
+		return s;
+	}
+}
