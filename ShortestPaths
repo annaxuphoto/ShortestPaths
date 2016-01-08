@@ -1,0 +1,167 @@
+
+
+import java.util.ArrayList;
+
+//
+// SHORTESTPATHS.JAVA
+// Compute shortest paths in a graph.
+//
+// Your constructor should compute the actual shortest paths and
+// maintain all the information needed to reconstruct them.  The
+// returnPath() function should use this information to return the
+// appropriate path of edge ID's from the start to the given end.
+//
+// Note that the start and end ID's should be mapped to vertices using
+// the graph's get() function.
+//
+// You can ignore the input and startTime arguments to the constructor
+// unless you are doing the extra credit.
+//
+class ShortestPaths {
+	Multigraph G;
+//	int startId;
+	Input input;
+	int startTime;
+	Vertex start;
+	int[] distance;
+	PriorityQueue<Vertex> pq;
+	Edge[] edges;
+	Vertex[] parent;
+	Handle<Vertex>[] handle;
+	//
+	// constructor
+	//
+	@SuppressWarnings("unchecked") //?????
+	public ShortestPaths(Multigraph G, int startId, 
+			Input input, int startTime) 
+	{
+		this.G = G;
+		start = new Vertex(startId);
+		this.input = input;
+		this.startTime = startTime;
+		pq = new PriorityQueue<Vertex>();
+		distance = new int[G.nVertices()];
+		edges = new Edge[G.nVertices()];
+		parent = new Vertex[G.nVertices()];
+		handle = new Handle[G.nVertices()];
+
+		//Dijkstra
+		
+		for(int i = 0; i < G.nVertices(); i++) {
+			distance[i] = Integer.MAX_VALUE;
+			parent[i] = null;
+			handle[i] = pq.insert(Integer.MAX_VALUE, G.get(i));
+		}
+		
+		pq.decreaseKey(handle[startId], 0);
+		distance[startId] = 0;
+		
+		while(!pq.isEmpty()) {
+			Handle<Vertex> u = new Handle<Vertex>(0, pq.extractMin());
+			Vertex.EdgeIterator adjEdges = u.value.adj();
+			if(distance[u.value.id()] == Integer.MAX_VALUE) {
+				break;
+			}
+			while(adjEdges.hasNext()) {
+				Edge edge = adjEdges.next();
+				if(pq.decreaseKey(handle[edge.to().id()], distance[u.value.id()] + edge.weight())) {
+					distance[edge.to().id()] = distance[u.value.id()] + edge.weight();
+					parent[edge.to().id()] = u.value;
+					edges[edge.to().id()] = edge;
+				}
+			}
+		}
+		
+//		for(int i = 0; i < G.nVertices(); i++) {
+//			if(G.get(i).equals(G.get(startId))) {
+//				Handle<Vertex> s = new Handle<Vertex>(0, G.get(startId));
+//				pq.decreaseKey(s, 0);
+//				distance[startId] = 0;
+//			}
+//			else{
+//				distance[i] = Integer.MAX_VALUE;
+//				G.get(i).parent = null; //update parent
+//				pq.insert(Integer.MAX_VALUE, G.get(i)); //initialize priority queue
+//
+//			}
+//		}
+
+		//		Handle<Vertex> s = new Handle<Vertex>(Integer.MAX_VALUE, G.get(startId));
+		//		s.setKey(0);
+		//		pq.decreaseKey(s, 0); //source vertex
+
+
+//		while(!pq.isEmpty()) {
+//			Handle<Vertex> u = new Handle<Vertex>(0, pq.extractMin()); //extract starting with source
+//			//			System.out.println("Dijkstra");
+//			if(u.getKey() == Integer.MAX_VALUE) { //infinite distance, cannot reach any more vertices from s
+//				break;
+//			}
+//			else {
+//				while(u.getValue().adj().hasNext()) { //while u has unexplored edges
+//					//					System.out.println("second while");
+//					Edge edge = u.getValue().adj().next();
+//					Handle<Vertex> v = new Handle<Vertex>(Integer.MAX_VALUE, edge.to()); 
+//					if(pq.decreaseKey(v, u.getKey() + edge.weight())) { //current distance plus new edge weight
+//												distance[edge.to().id()] = distance[u.value.id() + edge.weight()];
+//						v.setKey(u.getKey() + edge.weight());
+//						v.value.parent = u.value;
+//					}
+//				}
+//			}
+//		}
+	}
+
+	//
+	// returnPath()
+	// Return an array containing a list of edge ID's forming
+	// a shortest path from the start vertex to the specified
+	// end vertex.
+	//
+	public int [] returnPath(int endId) 
+	{ 
+		// your code here
+		
+		int i = endId;
+		ArrayList<Integer> path = new ArrayList<Integer>();
+		int[] finalPath;
+		
+		while(parent[i] != null) {
+			Edge edge = edges[i];
+			path.add(edge.id());
+			i = parent[i].id();
+		}
+		
+		if(path.size() == 0)
+			return new int[0];
+		else {
+			finalPath = new int[path.size()];
+			for(int j = path.size()-1; j >= 0; j--) {
+				finalPath[path.size()-j-1] = path.get(j);
+			}
+			return finalPath;
+		}
+
+//		if(start.id() == endId) {
+//			return new int[0];
+//		}
+//		ArrayList<Integer> path = new ArrayList<Integer>();
+//		Vertex end = G.get(endId);
+//		while(!parent[end.id()].equals(start)) { //iterates until right before start vertex
+//			while(parent[end.id()].adj().hasNext()) {
+//				Edge edge = parent[end.id()].adj().next();
+//				if(edge.to().equals(end)) {
+//					path.add(edge.id());
+//				}
+//				end = end.parent;
+//			}
+//		}
+//		int[] answer = new int[path.size()];
+//		for(int i = path.size()-1; i >= 0; i--) {
+//			answer[path.size()-i-1] = path.get(i);
+//		}
+//		return answer;
+//	}
+
+	}
+}
